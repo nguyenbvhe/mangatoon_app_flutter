@@ -35,10 +35,9 @@ class AuthNavigationCenter extends StatefulWidget {
 
 class _AuthNavigationCenterState extends State<AuthNavigationCenter> {
   // Biến quản lý trạng thái màn hình hiện tại
-  // 'welcome' -> Màn hình xác thực ban đầu
   // 'login'   -> Màn hình đăng nhập
   // 'register'-> Màn hình đăng ký
-  String _currentView = 'welcome';
+  String _currentView = 'login';
 
   void _navigateTo(String view) {
     setState(() {
@@ -59,7 +58,7 @@ class _AuthNavigationCenterState extends State<AuthNavigationCenter> {
     switch (_currentView) {
       case 'login':
         return LoginScreen(
-          onBack: () => _navigateTo('welcome'),
+          onBack: () => {},
           onNavigateToRegister: () => _navigateTo('register'),
         );
       case 'register':

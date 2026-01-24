@@ -1,105 +1,95 @@
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
-  final VoidCallback onBack;
   final VoidCallback onNavigateToRegister;
+  final VoidCallback onBack;
 
-  const LoginScreen({super.key, required this.onBack, required this.onNavigateToRegister});
+  const LoginScreen({super.key, required this.onNavigateToRegister, required this.onBack});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 50),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildTopIcon(Icons.login_rounded),
-          const SizedBox(height: 20),
-          const Text("Đăng nhập", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: Color(0xFF6359A5))),
-          const Text("Chào mừng bạn trở lại!", style: TextStyle(color: Colors.grey, fontSize: 15)),
-          const SizedBox(height: 35),
-          
-          _buildSocialButton("Đăng nhập với Google", Icons.g_mobiledata),
-          
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 25),
-            child: Text("hoặc", style: TextStyle(color: Colors.grey)),
+          // Icon với hiệu ứng Glow mờ
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7B6AD0).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.auto_awesome, color: Color(0xFF7B6AD0), size: 32),
           ),
-
-          _buildInputField("Email *", Icons.email_outlined),
+          const SizedBox(height: 16),
+          const Text("Welcome Back", style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF2D3142), letterSpacing: -0.5)),
+          const Text("Đăng nhập để tiếp tục khám phá", style: TextStyle(color: Colors.black45, fontSize: 13)),
+          const SizedBox(height: 28),
+          
+          _buildCustomField("Email Address", Icons.alternate_email_rounded, false),
+          const SizedBox(height: 16),
+          _buildCustomField("Password", Icons.lock_open_rounded, true),
+          
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {},
+              child: const Text("Quên mật khẩu?", style: TextStyle(color: Color(0xFF7B6AD0), fontSize: 12, fontWeight: FontWeight.w600)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildLuxuryButton("Sign In", Icons.arrow_forward_rounded, () {}),
           const SizedBox(height: 20),
-          _buildInputField("Mật khẩu *", Icons.lock_outline, isPassword: true),
-
-          const SizedBox(height: 15),
+          
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextButton(onPressed: onNavigateToRegister, child: const Text("Đăng ký", style: TextStyle(color: Color(0xFF7B6AD0)))),
-              TextButton(onPressed: () {}, child: const Text("Quên mật khẩu?", style: TextStyle(color: Color(0xFF7B6AD0)))),
+              const Text("Chưa có tài khoản? ", style: TextStyle(color: Colors.black54, fontSize: 13)),
+              GestureDetector(
+                onTap: onNavigateToRegister,
+                child: const Text("Tạo ngay", style: TextStyle(color: Color(0xFF7B6AD0), fontWeight: FontWeight.bold, fontSize: 13)),
+              ),
             ],
           ),
-
-          const SizedBox(height: 30),
-          _buildPrimaryButton("Đăng nhập", Icons.login_rounded),
         ],
       ),
     );
   }
 
-  Widget _buildTopIcon(IconData icon) {
+  Widget _buildCustomField(String hint, IconData icon, bool isPass) {
     return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF7B6AD0)),
-      child: Icon(icon, color: Colors.white, size: 35),
-    );
-  }
-
-  Widget _buildInputField(String label, IconData icon, {bool isPassword = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        TextField(
-          obscureText: isPassword,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20, color: Color(0xFF7B6AD0)),
-            suffixIcon: isPassword ? const Icon(Icons.visibility_outlined, size: 20) : null,
-            contentPadding: const EdgeInsets.symmetric(vertical: 18),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSocialButton(String text, IconData icon) {
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 55),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        side: const BorderSide(color: Color(0xFF4285F4)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F5F9),
+        borderRadius: BorderRadius.circular(16),
       ),
-      icon: Icon(icon, color: const Color(0xFF4285F4), size: 30),
-      label: Text(text, style: const TextStyle(color: Color(0xFF4285F4), fontWeight: FontWeight.w600)),
-      onPressed: () {},
+      child: TextField(
+        obscureText: isPass,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.black26, fontSize: 14),
+          prefixIcon: Icon(icon, color: const Color(0xFF7B6AD0), size: 20),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+        ),
+      ),
     );
   }
 
-  Widget _buildPrimaryButton(String text, IconData icon) {
+  Widget _buildLuxuryButton(String text, IconData icon, VoidCallback tap) {
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 52,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF7B6AD0), Color(0xFF6359A5)]),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(colors: [Color(0xFF7B6AD0), Color(0xFF9283E0)]),
+        boxShadow: [BoxShadow(color: const Color(0xFF7B6AD0).withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6))],
       ),
       child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent),
-        onPressed: () {},
-        icon: Icon(icon, color: Colors.white),
-        label: Text(text, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+        onPressed: tap,
+        icon: Text(text, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        label: Icon(icon, color: Colors.white, size: 18),
       ),
     );
   }

@@ -8,108 +8,146 @@ class RegisterScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 50),
+      // Padding cân đối để card trông thanh thoát
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon Đăng ký (Đổi sang person_add)
-          _buildTopIcon(Icons.person_add_rounded),
-          const SizedBox(height: 20),
-          const Text("Đăng ký", style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: Color(0xFF6359A5))),
-          const Text("Tạo tài khoản mới để bắt đầu", style: TextStyle(color: Colors.grey, fontSize: 15)),
-          const SizedBox(height: 35),
-          
-          _buildSocialButton("Đăng ký với Google", Icons.g_mobiledata),
-          
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 25),
-            child: Text("hoặc", style: TextStyle(color: Colors.grey)),
+          // Icon phía trên với hiệu ứng đổ bóng màu nhạt
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF7B6AD0).withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.person_add_alt_1_rounded, 
+              color: Color(0xFF7B6AD0), 
+              size: 32
+            ),
           ),
-
-          // Giữ nguyên 2 trường giống Login
-          _buildInputField("Email *", Icons.email_outlined),
-          const SizedBox(height: 20),
-          _buildInputField("Mật khẩu *", Icons.lock_outline, isPassword: true),
+          const SizedBox(height: 16),
           
-          // THÊM TRƯỜNG NHẬP LẠI MẬT KHẨU
-          const SizedBox(height: 20),
-          _buildInputField("Nhập lại mật khẩu *", Icons.lock_reset_outlined, isPassword: true),
-
-          const SizedBox(height: 20),
+          // Tiêu đề chính
+          const Text(
+            "Create Account", 
+            style: TextStyle(
+              fontSize: 26, 
+              fontWeight: FontWeight.w800, 
+              color: Color(0xFF2D3142), 
+              letterSpacing: -0.5
+            )
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            "Bắt đầu hành trình của bạn ngay hôm nay", 
+            style: TextStyle(color: Colors.black45, fontSize: 13)
+          ),
+          const SizedBox(height: 30),
+          
+          // Các ô nhập liệu thiết kế hiện đại (Không viền cứng)
+          _buildCustomField("Email Address", Icons.alternate_email_rounded, false),
+          const SizedBox(height: 12),
+          _buildCustomField("Password", Icons.lock_open_rounded, true),
+          const SizedBox(height: 12),
+          _buildCustomField("Confirm Password", Icons.verified_user_outlined, true),
+          
+          const SizedBox(height: 24),
+          
+          // Nút Đăng ký với hiệu ứng Gradient và Shadow màu
+          _buildLuxuryButton("Sign Up", Icons.rocket_launch_rounded, () {
+            // Xử lý logic đăng ký tại đây
+          }),
+          
+          const SizedBox(height: 24),
+          
+          // Dòng điều hướng về Login
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Đã có tài khoản?"),
-              TextButton(
-                onPressed: onNavigateToLogin, 
-                child: const Text("Đăng nhập", style: TextStyle(color: Color(0xFF7B6AD0), fontWeight: FontWeight.bold))
+              const Text(
+                "Đã có tài khoản? ", 
+                style: TextStyle(color: Colors.black54, fontSize: 13)
+              ),
+              GestureDetector(
+                onTap: onNavigateToLogin,
+                child: const Text(
+                  "Đăng nhập", 
+                  style: TextStyle(
+                    color: Color(0xFF7B6AD0), 
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 13
+                  )
+                ),
               ),
             ],
           ),
-
-          const SizedBox(height: 20),
-          _buildPrimaryButton("Đăng ký", Icons.person_add_alt_1_rounded),
         ],
       ),
     );
   }
 
-  // --- CÁC HÀM HELPER GIỮ NGUYÊN ĐỂ ĐỒNG BỘ GIAO DIỆN ---
-
-  Widget _buildTopIcon(IconData icon) {
+  // --- HÀM TẠO Ô NHẬP LIỆU (CUSTOM TEXTFIELD) ---
+  Widget _buildCustomField(String hint, IconData icon, bool isPass) {
     return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF7B6AD0)),
-      child: Icon(icon, color: Colors.white, size: 35),
-    );
-  }
-
-  Widget _buildInputField(String label, IconData icon, {bool isPassword = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        TextField(
-          obscureText: isPassword,
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, size: 20, color: Color(0xFF7B6AD0)),
-            suffixIcon: isPassword ? const Icon(Icons.visibility_outlined, size: 20) : null,
-            contentPadding: const EdgeInsets.symmetric(vertical: 18),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSocialButton(String text, IconData icon) {
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 55),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        side: const BorderSide(color: Color(0xFF4285F4)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F5F9), // Màu nền xám nhạt tinh tế
+        borderRadius: BorderRadius.circular(16),
       ),
-      icon: Icon(icon, color: const Color(0xFF4285F4), size: 30),
-      label: Text(text, style: const TextStyle(color: Color(0xFF4285F4), fontWeight: FontWeight.w600)),
-      onPressed: () {},
+      child: TextField(
+        obscureText: isPass,
+        style: const TextStyle(fontSize: 14, color: Color(0xFF2D3142)),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.black26, fontSize: 14),
+          prefixIcon: Icon(icon, color: const Color(0xFF7B6AD0), size: 20),
+          suffixIcon: isPass 
+              ? const Icon(Icons.visibility_off_outlined, color: Colors.black12, size: 18) 
+              : null,
+          border: InputBorder.none, // Loại bỏ viền thô cứng
+          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+        ),
+      ),
     );
   }
 
-  Widget _buildPrimaryButton(String text, IconData icon) {
+  // --- HÀM TẠO NÚT BẤM SANG TRỌNG (LUXURY BUTTON) ---
+  Widget _buildLuxuryButton(String text, IconData icon, VoidCallback tap) {
     return Container(
       width: double.infinity,
-      height: 60,
+      height: 54,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF7B6AD0), Color(0xFF6359A5)]),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF7B6AD0), Color(0xFF9283E0)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF7B6AD0).withOpacity(0.35),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          )
+        ],
       ),
       child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent, shadowColor: Colors.transparent),
-        onPressed: () {},
-        icon: Icon(icon, color: Colors.white),
-        label: Text(text, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent, 
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+        onPressed: tap,
+        icon: Icon(icon, color: Colors.white, size: 18),
+        label: Text(
+          text, 
+          style: const TextStyle(
+            color: Colors.white, 
+            fontSize: 16, 
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5
+          )
+        ),
       ),
     );
   }
