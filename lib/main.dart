@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login/auth_wrapper.dart';
-import 'login/welcome_screen.dart';
+import 'login/wrapper.dart';
 import 'login/login_screen.dart';
 import 'login/register_screen.dart';
 
@@ -18,8 +17,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        // Sử dụng font hệ thống hoặc Roboto để giống giao diện web
-        fontFamily: 'Roboto', 
+        fontFamily: 'Roboto',
       ),
       home: const AuthNavigationCenter(),
     );
@@ -34,11 +32,8 @@ class AuthNavigationCenter extends StatefulWidget {
 }
 
 class _AuthNavigationCenterState extends State<AuthNavigationCenter> {
-  // Biến quản lý trạng thái màn hình hiện tại
-  // 'welcome' -> Màn hình xác thực ban đầu
-  // 'login'   -> Màn hình đăng nhập
-  // 'register'-> Màn hình đăng ký
-  String _currentView = 'welcome';
+  /// 'login' | 'register'
+  String _currentView = 'login';
 
   void _navigateTo(String view) {
     setState(() {
@@ -48,31 +43,23 @@ class _AuthNavigationCenterState extends State<AuthNavigationCenter> {
 
   @override
   Widget build(BuildContext context) {
-    // AuthWrapper chứa Background Gradient và Card trắng bo tròn
     return AuthWrapper(
       child: _buildCurrentBody(),
     );
   }
 
-  // Hàm quyết định nội dung nào được hiển thị bên trong Card trắng
   Widget _buildCurrentBody() {
     switch (_currentView) {
-      case 'login':
-        return LoginScreen(
-          onBack: () => _navigateTo('welcome'),
-          onNavigateToRegister: () => _navigateTo('register'),
-        );
       case 'register':
         return RegisterScreen(
           onNavigateToLogin: () => _navigateTo('login'),
-          // Bạn có thể thêm onBack cho Register tương tự Login nếu muốn
         );
-      case 'welcome':
+
+      case 'login':
       default:
-        // Khớp với logic AuthIndex.jsx
-        return WelcomeScreen(
-          onLogin: () => _navigateTo('login'),
-          onRegister: () => _navigateTo('register'),
+        return LoginScreen(
+          onBack: () {}, // hoặc bỏ nếu không dùng
+          onNavigateToRegister: () => _navigateTo('register'),
         );
     }
   }
