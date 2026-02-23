@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login/wrapper.dart';
+import 'login/auth_wrapper.dart';    
 import 'login/login_screen.dart';
 import 'login/register_screen.dart';
 
@@ -18,6 +18,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Roboto',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF8E79D1),
+          primary: const Color(0xFF8E79D1),
+        ),
+        // Bạn có thể thêm scaffoldBackgroundColor nếu muốn
+        // scaffoldBackgroundColor: Colors.transparent,
       ),
       home: const AuthNavigationCenter(),
     );
@@ -36,9 +42,7 @@ class _AuthNavigationCenterState extends State<AuthNavigationCenter> {
   String _currentView = 'login';
 
   void _navigateTo(String view) {
-    setState(() {
-      _currentView = view;
-    });
+    setState(() => _currentView = view);
   }
 
   @override
@@ -58,7 +62,8 @@ class _AuthNavigationCenterState extends State<AuthNavigationCenter> {
       case 'login':
       default:
         return LoginScreen(
-          onBack: () {}, // hoặc bỏ nếu không dùng
+          // Nếu LoginScreen không thực sự dùng onBack → có thể bỏ tham số này
+          onBack: () {}, 
           onNavigateToRegister: () => _navigateTo('register'),
         );
     }
