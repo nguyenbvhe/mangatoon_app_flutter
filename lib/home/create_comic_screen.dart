@@ -1,6 +1,8 @@
+import 'dart:io'; // Dùng để làm việc với File ảnh
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; // Thư viện chọn ảnh
 import '../models/comic_model.dart';
-import '../data/mock_data.dart'; // Để add truyện mới vào danh sách giả
+import '../data/mock_data.dart';
 
 class CreateComicScreen extends StatefulWidget {
   const CreateComicScreen({super.key});
@@ -12,23 +14,40 @@ class CreateComicScreen extends StatefulWidget {
 class _CreateComicScreenState extends State<CreateComicScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers cho các trường nhập liệu
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _authorController = TextEditingController(text: "Bui Van Nguyen K17 HL"); // Mặc định theo ảnh
+  final TextEditingController _authorController = TextEditingController(text: "Bui Van Nguyen K17 HL");
   final TextEditingController _tagsController = TextEditingController();
   final TextEditingController _descController = TextEditingController();
 
-  // Biến lưu trạng thái
-  String _selectedStatus = 'Tiếp tục cập nhật'; // Tình trạng
+  String _selectedStatus = 'Tiếp tục cập nhật';
   final List<String> _statusOptions = ['Tiếp tục cập nhật', 'Đã hoàn thành', 'Tạm ngưng'];
 
-  // Danh sách Thể loại (Genres) để chọn
   final List<String> _availableGenres = ['Hành động', 'Truyện hài', 'Kinh dị', 'Huyền huyễn', 'Người đóng góp', 'Bí ẩn', 'Mạo hiểm', 'Xuyên không', 'Lãng mạn', 'Học đường'];
   final List<String> _selectedGenres = [];
 
-  // Checkbox Xác nhận
   bool _confirmOwnership = false;
   bool _agreeTerms = false;
+
+  // --- THÊM PHẦN XỬ LÝ ẢNH TẠI ĐÂY ---
+  File? _thumbnailImage;
+  File? _posterImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(bool isThumbnail) async {
+    // Mở thư viện ảnh
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    
+    if (pickedFile != null) {
+      setState(() {
+        if (isThumbnail) {
+          _thumbnailImage = File(pickedFile.path);
+        } else {
+          _posterImage = File(pickedFile.path);
+        }
+      });
+    }
+  }
+  // -----------------------------------
 
   @override
   void dispose() {
@@ -39,11 +58,14 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
     super.dispose();
   }
 
-  // Hàm xử lý khi bấm nút TẠO
   void _submitComic() {
     if (_formKey.currentState!.validate()) {
       if (_selectedGenres.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng chọn ít nhất 1 thể loại!')));
+        return;
+      }
+      if (_thumbnailImage == null) {
+         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vui lòng chọn ảnh Thumbnail!')));
         return;
       }
       if (!_confirmOwnership || !_agreeTerms) {
@@ -51,13 +73,14 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
         return;
       }
 
-      // Tạo đối tượng Comic mới
+      // Lưu ý: Trong thực tế, bạn sẽ phải upload File ảnh (_thumbnailImage) lên Firebase Storage hoặc server 
+      // để lấy về cái Link (URL) rồi mới lưu vào Database.
+      // Ở đây dùng Mock Data nên ta tạm dùng một Link ảnh ngẫu nhiên để không bị lỗi màn Chi tiết.
       final newComic = Comic(
-        id: 'comic_${DateTime.now().millisecondsSinceEpoch}', // ID ngẫu nhiên
+        id: 'comic_${DateTime.now().millisecondsSinceEpoch}',
         title: _titleController.text,
         description: _descController.text,
-        // Dùng ảnh tạm vì chưa tích hợp thư viện chọn ảnh thật
-        coverImage: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80', 
+        coverImage: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80', // Ảnh mock
         author: _authorController.text,
         status: _selectedStatus == 'Tiếp tục cập nhật' ? 'Đang ra' : 'Đã Full',
         genres: _selectedGenres,
@@ -66,13 +89,12 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
         chapters: [],
       );
 
-      // Thêm vào mock data (Sau này sẽ gọi API để lưu vào Database ở đây)
       setState(() {
-        mockComics.insert(0, newComic); // Cho lên đầu danh sách
+        mockComics.insert(0, newComic);
       });
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Tạo truyện thành công!')));
-      Navigator.pop(context); // Quay lại màn hình trước đó
+      Navigator.pop(context);
     }
   }
 
@@ -93,7 +115,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // BƯỚC 1: HEADER TIẾN TRÌNH (Tạo tác phẩm -> Thêm chapter -> Nộp chờ)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -104,7 +125,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
               ),
               const SizedBox(height: 32),
 
-              // BƯỚC 2: FORM NHẬP LIỆU
               _buildLabel('* Tên truyện:'),
               TextFormField(
                 controller: _titleController,
@@ -128,7 +148,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
               ),
               const SizedBox(height: 24),
 
-              // BƯỚC 3: CHECKBOX THỂ LOẠI
               _buildLabel('* Thể loại:'),
               Wrap(
                 spacing: 10,
@@ -154,7 +173,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
               ),
               const SizedBox(height: 24),
 
-              // BƯỚC 4: DROPDOWN TÌNH TRẠNG CẬP NHẬT
               _buildLabel('* Tình trạng cập nhật:'),
               DropdownButtonFormField<String>(
                 value: _selectedStatus,
@@ -166,18 +184,17 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
               ),
               const SizedBox(height: 24),
 
-              // BƯỚC 5: KHU VỰC CHỌN ẢNH (Mock UI)
+              // BƯỚC 5: KHU VỰC CHỌN ẢNH ĐÃ ĐƯỢC CẬP NHẬT
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildImageUploadArea('* Ảnh thumbnail:')),
+                  Expanded(child: _buildImageUploadArea('* Ảnh thumbnail:', true, _thumbnailImage)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildImageUploadArea('* Ảnh poster:')),
+                  Expanded(child: _buildImageUploadArea('* Ảnh poster:', false, _posterImage)),
                 ],
               ),
               const SizedBox(height: 24),
 
-              // BƯỚC 6: MÔ TẢ TRUYỆN
               _buildLabel('* Mô tả truyện:'),
               TextFormField(
                 controller: _descController,
@@ -187,7 +204,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
               ),
               const SizedBox(height: 24),
 
-              // BƯỚC 7: XÁC NHẬN ĐIỀU KHOẢN
               CheckboxListTile(
                 value: _confirmOwnership,
                 title: const Text('Tôi xác nhận truyện tiểu thuyết là do tôi sáng tác và thuộc sở hữu của tôi', style: TextStyle(fontSize: 13)),
@@ -206,14 +222,13 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
               ),
               const SizedBox(height: 32),
 
-              // NÚT SUBMIT
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _submitComic,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE94057), // Màu đỏ hồng giống ảnh
+                    backgroundColor: const Color(0xFFE94057),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: const Text('Tạo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -227,7 +242,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
     );
   }
 
-  // Tiện ích vẽ chữ Nhãn (Label)
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -235,7 +249,6 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
     );
   }
 
-  // Tiện ích viền TextField
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
@@ -247,34 +260,45 @@ class _CreateComicScreenState extends State<CreateComicScreen> {
     );
   }
 
-  // Tiện ích vẽ cục upload ảnh giả
-  Widget _buildImageUploadArea(String label) {
+  // --- HÀM VẼ KHU VỰC ẢNH MỚI CÓ THỂ BẤM VÀO ĐƯỢC ---
+  Widget _buildImageUploadArea(String label, bool isThumbnail, File? imageFile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildLabel(label),
-        Container(
-          height: 160,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.grey.shade50,
-          ),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add_photo_alternate_outlined, size: 40, color: Colors.grey),
-              SizedBox(height: 8),
-              Text('Chọn file', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500)),
-            ],
+        GestureDetector(
+          onTap: () => _pickImage(isThumbnail), // Bấm vào sẽ mở thư viện
+          child: Container(
+            height: 160,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.grey.shade50,
+            ),
+            // Nếu có ảnh thì hiển thị ảnh, nếu null thì hiển thị khung Icon
+            child: imageFile != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      imageFile,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_photo_alternate_outlined, size: 40, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text('Chọn file', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
           ),
         )
       ],
     );
   }
 
-  // Tiện ích vẽ Progress Step (1 - 2 - 3)
   Widget _buildStepIndicator(String number, String title, {required bool isActive}) {
     return Column(
       children: [
