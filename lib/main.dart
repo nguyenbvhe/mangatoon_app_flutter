@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home/home_page.dart'; // File chứa giao diện truyện tranh
+import 'home/home_page.dart';
 import 'login/login_screen.dart';
 import 'login/register_screen.dart';
 import 'login/auth_wrapper.dart';
@@ -19,10 +19,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF8E79D1)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF8E79D1),
+        ),
       ),
-      // THAY ĐỔI TẠI ĐÂY: Màn hình Home sẽ hiện ra đầu tiên
-      home: const HomePage(), 
+      // Giữ HomePage làm màn hình đầu tiên
+      home: const HomePage(),
     );
   }
 }
