@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'create_comic_screen.dart'; 
+import '../login/login_screen.dart'; 
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -28,60 +29,58 @@ class ProfileScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildProfileHeader(),
+            _buildProfileHeader(context), // Truyền context vào đây để chuyển trang
             const SizedBox(height: 12),
             _buildWalletCard(),
             const SizedBox(height: 12),
-            _buildMenuItems(context), // Truyền context vào đây để chuyển trang
+            _buildMenuItems(context), 
           ],
         ),
       ),
     );
   }
 
-  // Phân vùng 1: Thông tin Avatar, Tên, Email
-  Widget _buildProfileHeader() {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 40,
-            backgroundImage: NetworkImage(
-              'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg', // Avatar mặc định
+  // Phân vùng 1: Thông tin Avatar, Tên, Email (Đã bọc GestureDetector để bấm vào được)
+  Widget _buildProfileHeader(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        // Chuyển sang màn hình Đăng nhập khi bấm vào khu vực này
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      },
+      child: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        child: Row(
+          children: [
+            const CircleAvatar(
+              radius: 40,
+              backgroundImage: NetworkImage(
+                'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg', // Avatar mặc định
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Reader_176674', 
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'reader@fptu.edu.vn', 
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[100],
-                    borderRadius: BorderRadius.circular(12),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Đăng nhập / Đăng ký', 
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  child: const Text(
-                    'Thành viên', 
-                    style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Vui lòng đăng nhập để tiếp tục', 
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            const Icon(Icons.chevron_right, color: Colors.grey), // Icon mũi tên chỉ hướng
+          ],
+        ),
       ),
     );
   }
@@ -153,7 +152,6 @@ class ProfileScreen extends StatelessWidget {
       color: Colors.white,
       child: Column(
         children: [
-          // Nút Đăng truyện mới được thêm vào đây
           _buildListTile(
             Icons.edit_document, 
             'Đăng truyện mới', 
@@ -178,7 +176,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Đã cập nhật hàm này để nhận thêm thuộc tính 'onTap'
+  // Widget dùng chung để tạo từng dòng menu
   Widget _buildListTile(IconData icon, String title, Color iconColor, {bool isLogout = false, VoidCallback? onTap}) {
     return ListTile(
       leading: Container(
