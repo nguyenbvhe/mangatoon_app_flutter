@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../models/comic_model.dart';
 import '../data/mock_data.dart'; 
 import 'comic_detail_screen.dart';
 
 class RecommentScreen extends StatelessWidget {
-  // Nhận danh sách truyện từ bên ngoài truyền vào
   final List<Comic> comics;
 
   const RecommentScreen({super.key, required this.comics});
@@ -33,7 +33,9 @@ class RecommentScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildBannerSection(context),
+            const SizedBox(height: 10),
+            // Gọi Widget Banner Tự Động Trượt
+            _AutoScrollBanner(comics: comics, onNavigate: _navigateToDetail), 
             const SizedBox(height: 20),
             _buildSectionTitle('🔥 Truyện Hot Trong Tuần'),
             _buildHorizontalList(context),
@@ -46,52 +48,6 @@ class RecommentScreen extends StatelessWidget {
     );
   }
 
-  // 1. Banner ngang cỡ lớn
-  Widget _buildBannerSection(BuildContext context) {
-    if (comics.isEmpty) return const SizedBox();
-    final topComic = comics.first; // Lấy tạm truyện đầu tiên làm Banner
-
-    return GestureDetector(
-      onTap: () => _navigateToDetail(context, topComic),
-      child: Container(
-        height: 200,
-        margin: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: NetworkImage(topComic.coverImage),
-            fit: BoxFit.cover,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            )
-          ]
-        ),
-        alignment: Alignment.bottomLeft,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-            ),
-          ),
-          child: Text(
-            topComic.title,
-            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Tiêu đề của từng mục (Section Title)
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -102,7 +58,6 @@ class RecommentScreen extends StatelessWidget {
     );
   }
 
-  // 2. Danh sách cuộn ngang (Truyện Hot)
   Widget _buildHorizontalList(BuildContext context) {
     return SizedBox(
       height: 220,
@@ -113,7 +68,7 @@ class RecommentScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final comic = comics[index];
           return GestureDetector(
-            onTap: () => _navigateToDetail(context, comic), // Nhấn để chuyển màn
+            onTap: () => _navigateToDetail(context, comic), 
             child: Container(
               width: 120,
               margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -146,17 +101,16 @@ class RecommentScreen extends StatelessWidget {
     );
   }
 
-  // 3. Danh sách cuộn dọc (Có thể bạn sẽ thích)
   Widget _buildVerticalList(BuildContext context) {
     return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(), // Tắt cuộn để không đụng độ với SingleChildScrollView
+      physics: const NeverScrollableScrollPhysics(), 
       shrinkWrap: true,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: comics.length,
       itemBuilder: (context, index) {
         final comic = comics[index];
         return GestureDetector(
-          onTap: () => _navigateToDetail(context, comic), // Nhấn để chuyển màn
+          onTap: () => _navigateToDetail(context, comic), 
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             child: Row(
@@ -208,12 +162,126 @@ class RecommentScreen extends StatelessWidget {
     );
   }
 
-  // HÀM ĐIỀU HƯỚNG: Đã được mở khóa và đặt đúng vị trí bên trong class
   void _navigateToDetail(BuildContext context, Comic comic) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ComicDetailScreen(comic: comic),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// WIDGET BANNER TỰ ĐỘNG TRƯỢT (STATEFUL WIDGET)
+// ==========================================
+class _AutoScrollBanner extends StatefulWidget {
+  final List<Comic> comics;
+  final void Function(BuildContext, Comic) onNavigate;
+
+  const _AutoScrollBanner({required this.comics, required this.onNavigate});
+
+  @override
+  State<_AutoScrollBanner> createState() => _AutoScrollBannerState();
+}
+
+class _AutoScrollBannerState extends State<_AutoScrollBanner> {
+  late PageController _pageController;
+  int _currentPage = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 0);
+
+    // Cài đặt Timer cứ 3 giây thì tự động trượt 1 lần
+    if (widget.comics.isNotEmpty) {
+      _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
+        // Lấy toàn bộ danh sách thay vì giới hạn 5
+        final maxPages = widget.comics.length;
+        
+        if (_currentPage < maxPages - 1) {
+          _currentPage++;
+        } else {
+          _currentPage = 0; // Quay lại trang đầu nếu đã đến cuối
+        }
+
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(
+            _currentPage,
+            duration: const Duration(milliseconds: 350), 
+            curve: Curves.easeIn,
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); 
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.comics.isEmpty) return const SizedBox();
+    
+    // Lấy toàn bộ danh sách để hiển thị
+    final maxPages = widget.comics.length;
+
+    return SizedBox(
+      height: 200,
+      child: PageView.builder(
+        controller: _pageController,
+        onPageChanged: (int page) {
+          setState(() {
+            _currentPage = page;
+          });
+        },
+        itemCount: maxPages,
+        itemBuilder: (context, index) {
+          final comic = widget.comics[index];
+          return GestureDetector(
+            onTap: () => widget.onNavigate(context, comic),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: NetworkImage(comic.coverImage),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ]
+              ),
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                  ),
+                ),
+                child: Text(
+                  comic.title,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

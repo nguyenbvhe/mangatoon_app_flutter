@@ -75,9 +75,9 @@ final List<Comic> mockComics = [
   ),
   Comic(
     id: 'comic_3',
-    title: 'Thám Tử Lừng Danh',
+    title: 'Thám Tử Lừng Danh Conan',
     description: 'Những vụ án hóc búa nhất đang chờ đợi được giải đáp...',
-    coverImage: 'https://images.unsplash.com/photo-1585366119957-e9730b6d0f60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    coverImage: 'https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/c/o/conan-2025-poster.jpg',
     author: 'Gosho Aoyama',
     status: 'Đang ra',
     genres: ['Bí ẩn', 'Hành động', 'Kinh dị'],
